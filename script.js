@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // أزرار التحكم
     const modeCards = document.querySelectorAll('.mode-card');
-    const selectModeBtns = document.querySelectorAll('.select-mode-btn');
     const startGameBtn = document.getElementById('start-game-btn');
     const player1NameInput = document.getElementById('player1-name');
     const player2NameInput = document.getElementById('player2-name');
@@ -75,38 +74,65 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // ----------------------------
-    // إعدادات اللعبة
+    // إعدادات اللعبة - الإصلاح هنا
     // ----------------------------
     
-    // اختيار نوع اللعبة
+    // اختيار نوع اللعبة - إضافة حدث لكل بطاقة
     modeCards.forEach(card => {
         card.addEventListener('click', function() {
             const mode = this.dataset.mode;
-            if (mode === 'online') return; // غير مفعل بعد
+            
+            // تجاهل إذا كان غير مفعل
+            if (mode === 'online') {
+                return; // غير مفعل بعد
+            }
             
             // إزالة التحديد من جميع البطاقات
-            modeCards.forEach(c => c.classList.remove('selected'));
+            modeCards.forEach(c => {
+                c.classList.remove('selected');
+            });
             
             // تحديد البطاقة المختارة
             this.classList.add('selected');
             gameMode = mode;
             
-            // إظهار إدخال أسماء اللاعبين في حالة Multiplayer
-            if (mode === 'multiplayer') {
-                playerNamesDiv.style.display = 'block';
-                players.black.type = 'human';
-            } else {
-                playerNamesDiv.style.display = 'none';
-                players.black.type = 'computer';
-            }
+            // تحديث عرض أسماء اللاعبين
+            updatePlayerNamesDisplay();
+            
+            console.log('تم اختيار وضع اللعب:', mode);
         });
     });
     
-    // بدء اللعبة
-    startGameBtn.addEventListener('click', function() {
+    // تحديث عرض أسماء اللاعبين
+    function updatePlayerNamesDisplay() {
         if (gameMode === 'multiplayer') {
-            players.white.name = player1NameInput.value || 'الأبيض';
-            players.black.name = player2NameInput.value || 'الأسود';
+            playerNamesDiv.style.display = 'block';
+            players.black.type = 'human';
+            
+            // تحديث القيم الافتراضية
+            player2NameInput.value = 'الأسود';
+            player2NameInput.placeholder = 'أدخل اسم اللاعب الثاني';
+        } else {
+            playerNamesDiv.style.display = 'none';
+            players.black.type = 'computer';
+            players.black.name = 'الكمبيوتر';
+        }
+    }
+    
+    // بدء اللعبة - إصلاح الحدث
+    startGameBtn.addEventListener('click', function() {
+        console.log('بدء اللعبة - الوضع:', gameMode);
+        
+        // التحقق من صحة الأسماء
+        if (gameMode === 'multiplayer') {
+            const player1Name = player1NameInput.value.trim();
+            const player2Name = player2NameInput.value.trim();
+            
+            players.white.name = player1Name || 'الأبيض';
+            players.black.name = player2Name || 'الأسود';
+        } else {
+            players.white.name = 'الأبيض';
+            players.black.name = 'الكمبيوتر';
         }
         
         // تحديث عرض الأسماء
@@ -115,17 +141,28 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // تحديث نوع اللعبة
         gameTypeDisplay.textContent = gameMode === 'computer' ? 'ضد الكمبيوتر' : 'لعب ثنائي';
-        gameModeDisplay.innerHTML = gameMode === 'computer' ? 
-            '<i class="fas fa-robot"></i><span>ضد الكمبيوتر</span>' : 
-            '<i class="fas fa-users"></i><span>لعب ثنائي</span>';
+        
+        // تحديث شريط العنوان
+        updateGameModeDisplay();
         
         // الانتقال إلى واجهة اللعب
         gameSetup.style.display = 'none';
         gameWrapper.style.display = 'block';
         
         // بدء اللعبة
-        resetGame();
+        setTimeout(() => {
+            resetGame();
+        }, 100);
     });
+    
+    // تحديث عرض نوع اللعبة
+    function updateGameModeDisplay() {
+        if (gameMode === 'computer') {
+            gameModeDisplay.innerHTML = '<i class="fas fa-robot"></i><span>ضد الكمبيوتر</span>';
+        } else {
+            gameModeDisplay.innerHTML = '<i class="fas fa-users"></i><span>لعب ثنائي</span>';
+        }
+    }
     
     // العودة للقائمة الرئيسية
     backBtn.addEventListener('click', function() {
@@ -138,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // ----------------------------
-    // لوحة الشطرنج الرئيسية
+    // باقي الكود يبقى كما هو مع تعديلات بسيطة
     // ----------------------------
     
     // تهيئة لوحة الشطرنج
@@ -255,6 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // التحقق إذا كان دور الكمبيوتر
         if (gameMode === 'computer' && currentPlayer === 'black' && players.black.type === 'computer') {
+            boardStatus.innerHTML = `<i class="fas fa-robot"></i><span>دور ${players.black.name}...</span>`;
             return;
         }
         
@@ -292,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // التحقق من نهاية اللعبة
                 if (isCheckmate()) {
-                    showResult(`${currentPlayer === 'white' ? 'الأسود' : 'الأبيض'} يفوز بكش مات!`);
+                    showResult(`${currentPlayer === 'white' ? players.black.name : players.white.name} يفوز بكش مات!`);
                     return;
                 }
                 
@@ -491,37 +529,4 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'الوزير',
             color: color,
             value: 9,
-            hasMoved: true
-        };
-        
-        updateBoardDisplay();
-        updateBoardMatrix();
-        boardStatus.innerHTML = `<i class="fas fa-crown"></i>
-                                <span>${players[color].name} رقى البيدق إلى وزير!</span>`;
-    }
-    
-    // أخذ قطعة
-    function capturePiece(row, col, piece) {
-        const capturedElement = document.createElement('div');
-        capturedElement.className = `captured-piece ${piece.type}`;
-        capturedElement.textContent = piece.piece;
-        capturedElement.title = `${piece.type} ${piece.color === 'white' ? 'أبيض' : 'أسود'}`;
-        
-        if (piece.color === 'white') {
-            blackCaptured.appendChild(capturedElement);
-        } else {
-            whiteCaptured.appendChild(capturedElement);
-        }
-        
-        // صوت أخذ قطعة
-        playCaptureSound();
-    }
-    
-    // تحديث عرض اللوحة
-    function updateBoardDisplay() {
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const squareElement = getSquareElement(row, col);
-                squareElement.innerHTML = '';
-                
-                const piece = boardState[row][co
+            hasMoved: 
