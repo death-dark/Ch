@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>شطرنج - Black Purple Red Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- شريط العنوان العلوي -->
+        <div class="top-bar">
+            <div class="title">
+                <i class="fas fa-chess-king"></i>
+                <h1>Black Purple Red</h1>
+            </div>
+            <div class="game-mode" id="game-mode-display">
+                <i class="fas fa-robot"></i>
+                <span>ضد الكمبيوتر</span>
+            </div>
+        </div>
+
+        <!-- خيارات بدء اللعبة -->
+        <div class="game-setup" id="game-setup">
+            <h2><i class="fas fa-gamepad"></i> اختر نوع اللعبة</h2>
+            
+            <div class="mode-options">
+                <div class="mode-card" data-mode="computer">
+                    <div class="mode-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>ضد الكمبيوتر</h3>
+                    <p>العب ضد الذكاء الاصطناعي</p>
+                    <button class="select-mode-btn">اختر</button>
+                </div>
+                
+                <div class="mode-card" data-mode="multiplayer">
+                    <div class="mode-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>لعب ثنائي</h3>
+                    <p>العب مع صديق على نفس الجهاز</p>
+                    <button class="select-mode-btn">اختر</button>
+                </div>
+                
+                <div class="mode-card" data-mode="online">
+                    <div class="mode-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>لعب أونلاين</h3>
+                    <p>العب مع لاعبين حول العالم</p>
+                    <button class="select-mode-btn" disabled>قريباً</button>
+                </div>
+            </div>
+            
+            <div class="player-names" id="player-names" style="display: none;">
+                <div class="name-input">
+                    <label for="player1-name"><i class="fas fa-user"></i> لاعب 1 (الأبيض)</label>
+                    <input type="text" id="player1-name" placeholder="أدخل اسمك" value="الأبيض">
+                </div>
+                <div class="name-input">
+                    <label for="player2-name"><i class="fas fa-user"></i> لاعب 2 (الأسود)</label>
+                    <input type="text" id="player2-name" placeholder="أدخل اسم الخصم" value="الأسود">
+                </div>
+                <button id="start-game-btn" class="start-btn">
+                    <i class="fas fa-play-circle"></i> ابدأ اللعب
+                </button>
+            </div>
+        </div>
+
+        <!-- منطقة اللعبة الرئيسية -->
+        <div class="game-wrapper" id="game-wrapper" style="display: none;">
+            <!-- معلومات اللعبة -->
+            <div class="mobile-game-info">
+                <div class="status-card">
+                    <div class="status-item">
+                        <span class="label">نوع اللعب:</span>
+                        <span id="game-type" class="value">ضد الكمبيوتر</span>
+                    </div>
+                    
+                    <div class="status-item">
+                        <span class="label">الدور:</span>
+                        <span id="current-turn" class="value player-white">الأبيض</span>
+                    </div>
+                    
+                    <div class="status-item">
+                        <span class="label">الحركة:</span>
+                        <span id="move-count" class="value">1</span>
+                    </div>
+                </div>
+
+                <!-- معلومات اللاعبين -->
+                <div class="players-info">
+                    <div class="player-info white-player">
+                        <div class="player-header">
+                            <i class="fas fa-user white-icon"></i>
+                            <span id="white-player-name">الأبيض</span>
+                        </div>
+                        <div class="time-display" id="white-time">10:00</div>
+                    </div>
+                    
+                    <div class="player-info black-player">
+                        <div class="player-header">
+                            <i class="fas fa-user black-icon"></i>
+                            <span id="black-player-name">الأسود</span>
+                        </div>
+                        <div class="time-display" id="black-time">10:00</div>
+                    </div>
+                </div>
+
+                <!-- مصفوفة الرقعة -->
+                <div class="board-matrix">
+                    <h3><i class="fas fa-table"></i> مصفوفة الرقعة</h3>
+                    <div class="matrix-container">
+                        <div class="matrix-grid" id="board-matrix">
+                            <!-- ستعرض مصفوفة 8x8 هنا -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة الشطرنج الرئيسية -->
+            <div class="board-container">
+                <!-- رقعة الشطرنج -->
+                <div id="chess-board"></div>
+                
+                <!-- حالة اللوحة -->
+                <div class="mobile-board-status" id="board-status">
+                    <i class="fas fa-chess-board"></i>
+                    <span>حرك قطعة بيضاء</span>
+                </div>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div class="mobile-controls">
+                <button id="pause-btn" class="mobile-btn">
+                    <i class="fas fa-pause"></i>
+                    <span>إيقاف</span>
+                </button>
+                
+                <button id="reset-btn" class="mobile-btn reset">
+                    <i class="fas fa-redo"></i>
+                    <span>إعادة</span>
+                </button>
+                
+                <button id="help-btn" class="mobile-btn help">
+                    <i class="fas fa-question-circle"></i>
+                    <span>مساعدة</span>
+                </button>
+                
+                <button id="hint-btn" class="mobile-btn hint">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>تلميح</span>
+                </button>
+                
+                <button id="back-btn" class="mobile-btn back">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </button>
+            </div>
+
+            <!-- القطع المأخوذة -->
+            <div class="mobile-captured">
+                <div class="captured-section">
+                    <div class="captured-header">
+                        <i class="fas fa-skull-crossbones white-icon"></i>
+                        <h3 id="white-captured-title">قطع الأسود المأخوذة</h3>
+                    </div>
+                    <div id="white-captured" class="captured-list">
+                        <!-- القطع التي أخذها الأبيض -->
+                    </div>
+                </div>
+                
+                <div class="captured-section">
+                    <div class="captured-header">
+                        <i class="fas fa-skull-crossbones black-icon"></i>
+                        <h3 id="black-captured-title">قطع الأبيض المأخوذة</h3>
+                    </div>
+                    <div id="black-captured" class="captured-list">
+                        <!-- القطع التي أخذها الأسود -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- دليل القطع -->
+            <div class="pieces-guide">
+                <h3><i class="fas fa-chess"></i> دليل قطع الشطرنج:</h3>
+                <div class="pieces-list">
+                    <div class="piece-guide">
+                        <span class="piece-icon king">♔</span>
+                        <span class="piece-name">الملك</span>
+                    </div>
+                    <div class="piece-guide">
+                        <span class="piece-icon queen">♕</span>
+                        <span class="piece-name">الوزير</span>
+                    </div>
+                    <div class="piece-guide">
+                        <span class="piece-icon rook">♖</span>
+                        <span class="piece-name">الطابية</span>
+                    </div>
+                    <div class="piece-guide">
+                        <span class="piece-icon bishop">♗</span>
+                        <span class="piece-name">الفيل</span>
+                    </div>
+                    <div class="piece-guide">
+                        <span class="piece-icon knight">♘</span>
+                        <span class="piece-name">الحصان</span>
+                    </div>
+                    <div class="piece-guide">
+                        <span class="piece-icon pawn">♙</span>
+                        <span class="piece-name">البيدق</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التعليمات -->
+    <div id="instructions-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-graduation-cap"></i> قواعد الشطرنج</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="rule">
+                    <h3><i class="fas fa-chess-king"></i> الملك:</h3>
+                    <p>يتحرك مربع واحد في جميع الاتجاهات.</p>
+                </div>
+                <div class="rule">
+                    <h3><i class="fas fa-chess-queen"></i> الوزير:</h3>
+                    <p>يتحرك أي عدد من المربعات في جميع الاتجاهات.</p>
+                </div>
+                <div class="rule">
+                    <h3><i class="fas fa-chess-rook"></i> الطابية:</h3>
+                    <p>يتحرك أي عدد من المربعات أفقياً أو عمودياً.</p>
+                </div>
+                <div class="rule">
+                    <h3><i class="fas fa-chess-bishop"></i> الفيل:</h3>
+                    <p>يتحرك أي عدد من المربعات قطرياً.</p>
+                </div>
+                <div class="rule">
+                    <h3><i class="fas fa-chess-knight"></i> الحصان:</h3>
+                    <p>يتحرك على شكل حرف L: مربعين ثم مربع جانبياً.</p>
+                </div>
+                <div class="rule">
+                    <h3><i class="fas fa-chess-pawn"></i> البيدق:</h3>
+                    <p>يتحرك للأمام مربع واحد، ويمكنه التحرك مربعين في أول حركة. يأخذ قطعة الخصم قطرياً.</p>
+                </div>
+                <div class="tip">
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>نصيحة:</strong> انقر على قطعة لرؤية حركاتها الممكنة باللون الأزرق.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة النتيجة -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content result-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-trophy"></i> نتيجة اللعبة</h2>
+            </div>
+            <div class="modal-body">
+                <div id="result-message" class="result-message"></div>
+                <div class="result-stats">
+                    <div class="stat">
+                        <span>عدد الحركات:</span>
+                        <span id="result-moves">0</span>
+                    </div>
+                    <div class="stat">
+                        <span>مدة اللعب:</span>
+                        <span id="result-time">00:00</span>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button id="play-again-btn" class="result-btn play-again">
+                        <i class="fas fa-redo"></i> لعب مرة أخرى
+                    </button>
+                    <button id="main-menu-btn" class="result-btn main-menu">
+                        <i class="fas fa-home"></i> القائمة الرئيسية
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
